@@ -120,62 +120,58 @@ export default function CustomersPage() {
   return (
     <>
       <Topbar />
-      <div className="max-w-7xl mx-auto py-8 px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          <div className="lg:col-span-1">
-            <AddCustomerCard onAdded={fetchCustomers} />
-          </div>
-          <div className="lg:col-span-2">
-            {loading ? (
-              <div>Loading...</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full bg-white rounded-lg shadow divide-y divide-gray-200">
-                  <thead className="bg-white">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Phone</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Total Orders</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Amount Paid</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Amount Pending</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Actions</th>
+      <div className="max-w-7xl mx-auto py-8 px-2 sm:px-4 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 items-start">
+          <div className="lg:col-span-2 order-1 lg:order-2 mt-4 lg:mt-0">
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white rounded-lg shadow divide-y divide-gray-200 text-xs sm:text-sm">
+                <thead className="bg-white">
+                  <tr>
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Name</th>
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Phone</th>
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Total Orders</th>
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Amount Paid</th>
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Amount Pending</th>
+                    <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {customers.map((c) => (
+                    <tr key={c.id}>
+                      {editingId === c.id ? (
+                        <>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap"><input type="text" value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} className="border border-black rounded px-2 py-1 text-black bg-white" required /></td>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap"><input type="tel" value={editForm.phone_number} onChange={e => setEditForm(f => ({ ...f, phone_number: e.target.value }))} className="border border-black rounded px-2 py-1 text-black bg-white" /></td>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap text-black">{c.totalOrders}</td>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap text-black">₹{c.amountPaid.toLocaleString()}</td>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap text-black">₹{c.amountPending.toLocaleString()}</td>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap flex gap-2">
+                            <Button size="sm" type="button" onClick={() => handleEditSave(c.id)}>Save</Button>
+                            <Button size="sm" type="button" onClick={() => setEditingId(null)}>Cancel</Button>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap font-medium text-black">{c.name}</td>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap text-black">{c.phone_number || '-'}</td>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap text-black">{c.totalOrders}</td>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap text-black">₹{c.amountPaid.toLocaleString()}</td>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap text-black">₹{c.amountPending.toLocaleString()}</td>
+                          <td className="px-2 sm:px-6 py-3 whitespace-nowrap flex gap-2">
+                            <Link href={`/customers/${c.id}`} className="underline text-black hover:text-black font-medium">View</Link>
+                            <Button size="sm" type="button" onClick={() => startEdit(c)}>Edit</Button>
+                            <Button size="sm" type="button" onClick={() => handleDelete(c.id)}>Delete</Button>
+                          </td>
+                        </>
+                      )}
                     </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {customers.map((c) => (
-                      <tr key={c.id}>
-                        {editingId === c.id ? (
-                          <>
-                            <td className="px-6 py-4 whitespace-nowrap"><input type="text" value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} className="border border-black rounded px-2 py-1 text-black bg-white" required /></td>
-                            <td className="px-6 py-4 whitespace-nowrap"><input type="tel" value={editForm.phone_number} onChange={e => setEditForm(f => ({ ...f, phone_number: e.target.value }))} className="border border-black rounded px-2 py-1 text-black bg-white" /></td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">{c.totalOrders}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">₹{c.amountPaid.toLocaleString()}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">₹{c.amountPending.toLocaleString()}</td>
-                            <td className="px-6 py-4 whitespace-nowrap flex gap-2">
-                              <Button size="sm" type="button" onClick={() => handleEditSave(c.id)}>Save</Button>
-                              <Button size="sm" type="button" onClick={() => setEditingId(null)}>Cancel</Button>
-                            </td>
-                          </>
-                        ) : (
-                          <>
-                            <td className="px-6 py-4 whitespace-nowrap font-medium text-black">{c.name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">{c.phone_number || '-'}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">{c.totalOrders}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">₹{c.amountPaid.toLocaleString()}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">₹{c.amountPending.toLocaleString()}</td>
-                            <td className="px-6 py-4 whitespace-nowrap flex gap-2">
-                              <Link href={`/customers/${c.id}`} className="underline text-black hover:text-black font-medium">View</Link>
-                              <Button size="sm" type="button" onClick={() => startEdit(c)}>Edit</Button>
-                              <Button size="sm" type="button" onClick={() => handleDelete(c.id)}>Delete</Button>
-                            </td>
-                          </>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="lg:col-span-1 order-2 lg:order-1">
+            <AddCustomerCard onAdded={fetchCustomers} />
           </div>
         </div>
       </div>

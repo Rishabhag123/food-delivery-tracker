@@ -14,7 +14,7 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="w-20 bg-white border-r border-border flex flex-col items-center py-8 shadow-sm">
+    <aside className="w-20 bg-white border-r border-border flex flex-col items-center py-8 shadow-sm hidden sm:flex">
       <div className="mb-10">
         <span className="text-2xl font-bold text-black">🍲</span>
       </div>

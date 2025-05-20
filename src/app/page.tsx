@@ -166,22 +166,14 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-background">
       <Topbar />
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-6 px-2 sm:px-6 lg:px-8">
         <DashboardStats />
-        <div className="px-4 pt-2 sm:px-0">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            <div className="lg:col-span-1">
-              <AddOrderCard
-                onAdded={() => setRefreshKey(k => k + 1)}
-                customers={customers}
-                menuItems={menuItems}
-              />
-            </div>
-            <div className="lg:col-span-2">
-              <div className="bg-card shadow rounded-lg p-4" style={{ minWidth: '900px' }}>
-                <h2 className="text-xl font-semibold mb-4 text-black">Orders</h2>
-                {/* Filter options */}
-                <div className="flex flex-wrap gap-4 mb-4 items-end">
+        <div className="py-2">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 items-start">
+            <div className="lg:col-span-2 order-1 lg:order-2 mt-4 lg:mt-0">
+              <div className="bg-card shadow rounded-lg p-2 sm:p-4" style={{ minWidth: '0' }}>
+                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-black">Orders</h2>
+                <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 mb-4 items-stretch sm:items-end">
                   <div>
                     <label className="block text-sm font-medium text-black mb-1">Filter by Date</label>
                     <input
@@ -225,15 +217,15 @@ export default function Home() {
                   <div>Loading...</div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white rounded-lg shadow divide-y divide-gray-200">
+                    <table className="min-w-full bg-white rounded-lg shadow divide-y divide-gray-200 text-xs sm:text-sm">
                       <thead className="bg-white">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Order Date</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Customer</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Order Details</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Amount</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Payment Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Actions</th>
+                          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Order Date</th>
+                          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Customer</th>
+                          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Order Details</th>
+                          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Amount</th>
+                          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Payment Status</th>
+                          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -241,12 +233,12 @@ export default function Home() {
                           const customer = customers.find((c: any) => c.id === order.customer_id);
                           return (
                             <tr key={order.id}>
-                              <td className="px-6 py-4 whitespace-nowrap text-black">{order.order_date ? order.order_date.slice(0, 10) : '-'}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-black">{customer ? customer.name : '-'}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-black">{order.order_details}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-black">₹{order.amount}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-black">{order.payment_status}</td>
-                              <td className="px-6 py-4 whitespace-nowrap flex gap-2">
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.order_date ? order.order_date.slice(0, 10) : '-'}</td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{customer ? customer.name : '-'}</td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.order_details}</td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">₹{order.amount}</td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.payment_status}</td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap flex gap-2">
                                 <Button size="sm" type="button" onClick={() => startEdit(order)}>Edit</Button>
                                 <Button size="sm" type="button" onClick={() => handleDelete(order.id)}>Delete</Button>
                               </td>
@@ -258,6 +250,13 @@ export default function Home() {
                   </div>
                 )}
               </div>
+            </div>
+            <div className="lg:col-span-1 order-2 lg:order-1">
+              <AddOrderCard
+                onAdded={() => setRefreshKey(k => k + 1)}
+                customers={customers}
+                menuItems={menuItems}
+              />
             </div>
           </div>
         </div>

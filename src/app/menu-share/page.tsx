@@ -57,9 +57,9 @@ export default function MenuSharePage() {
   return (
     <>
       <Topbar />
-      <div className="max-w-2xl mx-auto py-8">
+      <div className="max-w-2xl mx-auto py-6 px-2 sm:px-4 lg:px-8">
         <h2 className="text-2xl font-bold mb-6 text-black">Menu Share (Today's Menu)</h2>
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8 mb-8">
           <h3 className="text-lg font-semibold mb-4 text-black">Select Menu Items for Today</h3>
           <div className="space-y-6 mb-6">
             {['Breakfast', 'Lunch', 'Dinner'].map(category => {
@@ -85,9 +85,9 @@ export default function MenuSharePage() {
           </div>
           <Button onClick={saveTodayMenu} size="md" className="w-full" disabled={saving}>{saving ? 'Saving...' : 'Save Today\'s Menu'}</Button>
         </div>
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8">
           <h3 className="text-lg font-semibold mb-4 text-black">Share Link with Customers</h3>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <input
               type="text"
               value={orderLink}
