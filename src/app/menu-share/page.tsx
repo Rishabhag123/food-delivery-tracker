@@ -9,10 +9,14 @@ export default function MenuSharePage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [orderLink, setOrderLink] = useState('');
 
   useEffect(() => {
     fetchMenu();
     fetchToday();
+    if (typeof window !== 'undefined') {
+      setOrderLink(`${window.location.origin}/order/today`);
+    }
   }, []);
 
   async function fetchMenu() {
@@ -44,8 +48,8 @@ export default function MenuSharePage() {
   }
 
   function copyLink() {
-    const url = `${window.location.origin}/order/today`;
-    navigator.clipboard.writeText(url);
+    if (!orderLink) return;
+    navigator.clipboard.writeText(orderLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -86,7 +90,7 @@ export default function MenuSharePage() {
           <div className="flex items-center gap-4">
             <input
               type="text"
-              value={`${window.location.origin}/order/today`}
+              value={orderLink}
               readOnly
               className="w-full border border-black rounded-lg px-3 py-2 bg-gray-100 text-black"
             />
