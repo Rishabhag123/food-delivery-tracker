@@ -109,6 +109,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ customer_id: '', menu_item_id: '', order_details: '', amount: '', payment_status: 'Unpaid' });
+  const [filterDate, setFilterDate] = useState('');
+  const [filterCustomer, setFilterCustomer] = useState('');
+  const [filterPaymentStatus, setFilterPaymentStatus] = useState('');
 
   useEffect(() => {
     fetchAll();
@@ -152,12 +155,20 @@ export default function Home() {
     setRefreshKey(k => k + 1);
   }
 
+  // Filtering logic
+  const filteredOrders = orders.filter(order => {
+    const matchesDate = filterDate ? order.order_date && order.order_date.slice(0, 10) === filterDate : true;
+    const matchesCustomer = filterCustomer ? order.customer_id === filterCustomer : true;
+    const matchesPayment = filterPaymentStatus ? order.payment_status === filterPaymentStatus : true;
+    return matchesDate && matchesCustomer && matchesPayment;
+  });
+
   return (
     <main className="min-h-screen bg-background">
       <Topbar />
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <DashboardStats />
-        <div className="px-4 py-6 sm:px-0">
+        <div className="px-4 pt-2 sm:px-0">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             <div className="lg:col-span-1">
               <AddOrderCard
@@ -167,8 +178,49 @@ export default function Home() {
               />
             </div>
             <div className="lg:col-span-2">
-              <div className="bg-card shadow rounded-lg p-6">
+              <div className="bg-card shadow rounded-lg p-4" style={{ minWidth: '900px' }}>
                 <h2 className="text-xl font-semibold mb-4 text-black">Orders</h2>
+                {/* Filter options */}
+                <div className="flex flex-wrap gap-4 mb-4 items-end">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">Filter by Date</label>
+                    <input
+                      type="date"
+                      value={filterDate}
+                      onChange={e => setFilterDate(e.target.value)}
+                      className="border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">Filter by Customer</label>
+                    <select
+                      value={filterCustomer}
+                      onChange={e => setFilterCustomer(e.target.value)}
+                      className="border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
+                    >
+                      <option value="">All Customers</option>
+                      {customers.map((c: any) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-1">Filter by Payment Status</label>
+                    <select
+                      value={filterPaymentStatus}
+                      onChange={e => setFilterPaymentStatus(e.target.value)}
+                      className="border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="Paid">Paid</option>
+                      <option value="Unpaid">Unpaid</option>
+                      <option value="Partial">Partial</option>
+                    </select>
+                  </div>
+                  {(filterDate || filterCustomer || filterPaymentStatus) && (
+                    <Button type="button" size="sm" className="h-10" onClick={() => { setFilterDate(''); setFilterCustomer(''); setFilterPaymentStatus(''); }}>Clear Filters</Button>
+                  )}
+                </div>
                 {loading ? (
                   <div>Loading...</div>
                 ) : (
@@ -176,6 +228,7 @@ export default function Home() {
                     <table className="min-w-full bg-white rounded-lg shadow divide-y divide-gray-200">
                       <thead className="bg-white">
                         <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Order Date</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Customer</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Order Details</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase">Amount</th>
@@ -184,72 +237,22 @@ export default function Home() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {orders.map((order) => (
-                          <tr key={order.id}>
-                            {editingId === order.id ? (
-                              <>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <select
-                                    value={editForm.customer_id}
-                                    onChange={e => setEditForm(f => ({ ...f, customer_id: e.target.value }))}
-                                    className="border border-black rounded px-2 py-1 text-black bg-white"
-                                    required
-                                  >
-                                    <option value="">Select Customer</option>
-                                    {customers.map((c: any) => (
-                                      <option key={c.id} value={c.id}>{c.name}</option>
-                                    ))}
-                                  </select>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <input
-                                    type="text"
-                                    value={editForm.order_details}
-                                    onChange={e => setEditForm(f => ({ ...f, order_details: e.target.value }))}
-                                    className="border border-black rounded px-2 py-1 text-black bg-white"
-                                    required
-                                  />
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <input
-                                    type="number"
-                                    value={editForm.amount}
-                                    onChange={e => setEditForm(f => ({ ...f, amount: e.target.value }))}
-                                    className="border border-black rounded px-2 py-1 text-black bg-white"
-                                    required
-                                  />
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <select
-                                    value={editForm.payment_status}
-                                    onChange={e => setEditForm(f => ({ ...f, payment_status: e.target.value }))}
-                                    className="border border-black rounded px-2 py-1 text-black bg-white"
-                                    required
-                                  >
-                                    <option value="Paid">Paid</option>
-                                    <option value="Unpaid">Unpaid</option>
-                                    <option value="Partial">Partial</option>
-                                  </select>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap flex gap-2">
-                                  <Button size="sm" type="button" onClick={() => handleEditSave(order.id)}>Save</Button>
-                                  <Button size="sm" type="button" onClick={() => setEditingId(null)}>Cancel</Button>
-                                </td>
-                              </>
-                            ) : (
-                              <>
-                                <td className="px-6 py-4 whitespace-nowrap text-black">{customers.find((c: any) => c.id === order.customer_id)?.name || '-'}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-black">{order.order_details}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-black">₹{order.amount.toLocaleString()}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-black">{order.payment_status}</td>
-                                <td className="px-6 py-4 whitespace-nowrap flex gap-2">
-                                  <Button size="sm" type="button" onClick={() => startEdit(order)}>Edit</Button>
-                                  <Button size="sm" type="button" onClick={() => handleDelete(order.id)}>Delete</Button>
-                                </td>
-                              </>
-                            )}
-                          </tr>
-                        ))}
+                        {filteredOrders.map((order) => {
+                          const customer = customers.find((c: any) => c.id === order.customer_id);
+                          return (
+                            <tr key={order.id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-black">{order.order_date ? order.order_date.slice(0, 10) : '-'}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-black">{customer ? customer.name : '-'}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-black">{order.order_details}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-black">₹{order.amount}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-black">{order.payment_status}</td>
+                              <td className="px-6 py-4 whitespace-nowrap flex gap-2">
+                                <Button size="sm" type="button" onClick={() => startEdit(order)}>Edit</Button>
+                                <Button size="sm" type="button" onClick={() => handleDelete(order.id)}>Delete</Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

@@ -3,7 +3,7 @@ import { FaBell } from 'react-icons/fa';
 export default function Topbar() {
   return (
     <header className="flex items-center justify-between px-8 py-4 bg-white border-b border-border shadow-sm">
-      <h1 className="text-2xl font-bold text-black tracking-tight">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-black tracking-tight">JMD Tiffins - Dashboard</h1>
       <div className="flex items-center gap-4">
         <div className="relative">
           <input
