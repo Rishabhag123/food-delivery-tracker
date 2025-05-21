@@ -171,37 +171,24 @@ export default function Home() {
         <div className="py-2">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 items-start">
             <div className="lg:col-span-2 order-1 lg:order-2 mt-4 lg:mt-0">
-              <div className="bg-card shadow rounded-lg p-2 sm:p-4" style={{ minWidth: '0' }}>
-                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-black">Orders</h2>
-                <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 mb-4 items-stretch sm:items-end">
-                  <div>
+              <div className="bg-card shadow rounded-lg p-2 sm:p-4 max-w-full overflow-x-auto">
+                <h2 className="text-lg sm:text-xl font-semibold mb-4 text-black">All Orders Table</h2>
+                <div className="flex flex-row gap-2 sm:gap-4 mb-4 items-end">
+                  <div className="flex-1 min-w-0">
                     <label className="block text-sm font-medium text-black mb-1">Filter by Date</label>
                     <input
                       type="date"
                       value={filterDate}
                       onChange={e => setFilterDate(e.target.value)}
-                      className="border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
+                      className="w-full border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-1">Filter by Customer</label>
-                    <select
-                      value={filterCustomer}
-                      onChange={e => setFilterCustomer(e.target.value)}
-                      className="border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
-                    >
-                      <option value="">All Customers</option>
-                      {customers.map((c: any) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <label className="block text-sm font-medium text-black mb-1">Filter by Payment Status</label>
                     <select
                       value={filterPaymentStatus}
                       onChange={e => setFilterPaymentStatus(e.target.value)}
-                      className="border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
+                      className="w-full border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
                     >
                       <option value="">All Statuses</option>
                       <option value="Paid">Paid</option>
@@ -217,7 +204,7 @@ export default function Home() {
                   <div>Loading...</div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white rounded-lg shadow divide-y divide-gray-200 text-xs sm:text-sm">
+                    <table className="w-full max-w-full bg-white rounded-lg shadow divide-y divide-gray-200 text-xs sm:text-sm">
                       <thead className="bg-white">
                         <tr>
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Order Date</th>
