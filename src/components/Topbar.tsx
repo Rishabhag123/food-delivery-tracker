@@ -4,19 +4,25 @@ import { FaBell } from 'react-icons/fa';
 import { FaBars } from 'react-icons/fa';
 import { useState } from 'react';
 import MobileSidebar from './MobileSidebar';
+import { usePathname } from 'next/navigation';
 
 export default function Topbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const pathname = usePathname();
+  const hideMobileNav = pathname === '/login' || pathname === '/order/today';
+
   return (
     <header className="flex items-center justify-between px-8 py-4 bg-white border-b border-border shadow-sm">
       <div className="flex items-center gap-3">
-        <button
-          className="sm:hidden p-2 rounded-full hover:bg-gray-100 text-black"
-          onClick={() => setShowMobileMenu(true)}
-          aria-label="Open menu"
-        >
-          <FaBars size={22} />
-        </button>
+        {!hideMobileNav && (
+          <button
+            className="sm:hidden p-2 rounded-full hover:bg-gray-100 text-black"
+            onClick={() => setShowMobileMenu(true)}
+            aria-label="Open menu"
+          >
+            <FaBars size={22} />
+          </button>
+        )}
         <h1 className="text-2xl font-bold text-black tracking-tight">JMD Tiffins - Dashboard</h1>
       </div>
       <div className="flex items-center gap-4">
@@ -27,7 +33,7 @@ export default function Topbar() {
           A
         </div>
       </div>
-      <MobileSidebar open={showMobileMenu} onClose={() => setShowMobileMenu(false)} />
+      {!hideMobileNav && <MobileSidebar open={showMobileMenu} onClose={() => setShowMobileMenu(false)} />}
     </header>
   );
 } 
