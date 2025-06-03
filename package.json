@@ -27,6 +27,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "tailwindcss": "^4",
+    "@types/js-cookie": "^3.0.0",
     "typescript": "^5"
   }
 }
