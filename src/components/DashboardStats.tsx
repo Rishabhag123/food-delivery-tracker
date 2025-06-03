@@ -1,24 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { FaMoneyBillWave, FaShoppingCart, FaChartLine, FaCalendarDay } from 'react-icons/fa';
-
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  icon: React.ReactNode;
-}
-
-function StatCard({ title, value, icon }: StatCardProps) {
-  return (
-    <div className="flex items-center gap-4 bg-white rounded-xl shadow p-5 min-w-[180px] border border-border">
-      <div className="p-3 rounded-full text-black bg-white border border-border text-xl">{icon}</div>
-      <div>
-        <div className="text-xs text-black font-medium mb-1">{title}</div>
-        <div className="text-lg font-bold text-black">{value}</div>
-      </div>
-    </div>
-  );
-}
+import StatCard from './ui/StatCard';
 
 export default function DashboardStats() {
   const [stats, setStats] = useState({
@@ -27,9 +10,11 @@ export default function DashboardStats() {
     totalRevenue: 0,
     todaysEarnings: 0,
   });
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     fetchStats();
+    setIsClient(true);
   }, []);
 
   async function fetchStats() {
@@ -50,27 +35,38 @@ export default function DashboardStats() {
   }
 
   return (
-    <div className="flex flex-wrap gap-6 mb-8">
-      <StatCard
-        title="Total Sales"
-        value={`₹${stats.totalSales.toLocaleString()}`}
-        icon={<FaMoneyBillWave className="text-black" />}
-      />
-      <StatCard
-        title="Total Orders"
-        value={stats.totalOrders}
-        icon={<FaShoppingCart className="text-black" />}
-      />
-      <StatCard
-        title="Total Revenue"
-        value={`₹${stats.totalRevenue.toLocaleString()}`}
-        icon={<FaChartLine className="text-black" />}
-      />
-      <StatCard
-        title="Today's Earnings"
-        value={`₹${stats.todaysEarnings.toLocaleString()}`}
-        icon={<FaCalendarDay className="text-black" />}
-      />
-    </div>
+    <>
+      {isClient ? (
+        <div className="flex flex-wrap gap-6 mb-8">
+          <StatCard
+            title="Total Sales"
+            value={`₹${stats.totalSales.toLocaleString()}`}
+            icon={<FaMoneyBillWave className="text-black" />}
+          />
+          <StatCard
+            title="Total Orders"
+            value={stats.totalOrders}
+            icon={<FaShoppingCart className="text-black" />}
+          />
+          <StatCard
+            title="Total Revenue"
+            value={`₹${stats.totalRevenue.toLocaleString()}`}
+            icon={<FaChartLine className="text-black" />}
+          />
+          <StatCard
+            title="Today's Earnings"
+            value={`₹${stats.todaysEarnings.toLocaleString()}`}
+            icon={<FaCalendarDay className="text-black" />}
+          />
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-6 mb-8 animate-pulse">
+          <div className="bg-gray-200 rounded-lg p-4 h-24 w-48"></div>
+          <div className="bg-gray-200 rounded-lg p-4 h-24 w-48"></div>
+          <div className="bg-gray-200 rounded-lg p-4 h-24 w-48"></div>
+          <div className="bg-gray-200 rounded-lg p-4 h-24 w-48"></div>
+        </div>
+      )}
+    </>
   );
 } 

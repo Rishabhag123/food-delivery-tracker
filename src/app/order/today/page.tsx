@@ -160,6 +160,23 @@ export default function PublicOrderPage() {
           </form>
         )}
       </div>
+
+      {/* Photo Carousel Section */}
+      <div className="w-full max-w-md mt-8">
+        <h3 className="text-lg font-semibold mb-4 text-black">Explore our Home Cooked Dishes!</h3>
+        <div className="flex space-x-4 overflow-x-auto pb-4">
+          {/* Replace with your actual image paths */}
+          {[ '/carousel-images/1.jpeg', '/carousel-images/2.jpeg', '/carousel-images/3.jpeg', '/carousel-images/4.jpeg', '/carousel-images/5.jpeg', '/carousel-images/6.jpeg', '/carousel-images/7.jpeg' ].map((imageUrl, index) => (
+            <div key={index} className="flex-shrink-0 w-40 h-40 bg-gray-200 rounded-lg overflow-hidden">
+              <img
+                src={imageUrl}
+                alt={`Dish photo ${index + 1}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 } 

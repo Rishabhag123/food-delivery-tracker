@@ -1,3 +1,5 @@
+"use client";
+
 import { FaBell } from 'react-icons/fa';
 import { FaBars } from 'react-icons/fa';
 import { useState } from 'react';

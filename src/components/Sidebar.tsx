@@ -8,7 +8,6 @@ const navItems = [
   { label: 'Customers', icon: <FaUserFriends className="text-black" />, href: '/customers' },
   { label: 'Menu', icon: <FaUtensils className="text-black" />, href: '/menu' },
   { label: 'Menu Share', icon: <FaShareAlt className="text-black" />, href: '/menu-share' },
-  { label: 'Settings', icon: <FaCog className="text-black" />, href: '#' },
 ];
 
 export default function Sidebar() {

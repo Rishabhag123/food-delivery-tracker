@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import Button from '@/components/ui/Button';
-import Topbar from '@/components/Topbar';
 import DashboardStats from '@/components/DashboardStats';
 
 function AddOrderCard({ onAdded, customers, menuItems }: any) {
@@ -114,22 +113,32 @@ export default function Home() {
   const [filterPaymentStatus, setFilterPaymentStatus] = useState('');
 
   useEffect(() => {
+    console.log('Fetching all data...');
     fetchAll();
   }, [refreshKey]);
 
   async function fetchAll() {
+    console.log('Starting fetchAll...');
     setLoading(true);
-    const { data: ordersData } = await supabase.from('orders').select('*').order('order_date', { ascending: false });
-    const { data: customersData } = await supabase.from('customers').select('*').order('name');
-    const { data: menuData } = await supabase.from('menu_items').select('*').order('date', { ascending: false });
+    const { data: ordersData, error: ordersError } = await supabase.from('orders').select('*').order('order_date', { ascending: false });
+    const { data: customersData, error: customersError } = await supabase.from('customers').select('*').order('name');
+    const { data: menuData, error: menuError } = await supabase.from('menu_items').select('*').order('date', { ascending: false });
+
+    if (ordersError) console.error('Error fetching orders:', ordersError);
+    if (customersError) console.error('Error fetching customers:', customersError);
+    if (menuError) console.error('Error fetching menu items:', menuError);
+
     setOrders(ordersData || []);
     setCustomers(customersData || []);
     setMenuItems(menuData || []);
     setLoading(false);
+    console.log('fetchAll complete. Orders:', ordersData?.length, 'Customers:', customersData?.length, 'Menu Items:', menuData?.length);
   }
 
   function startEdit(order: any) {
+    console.log('Edit button clicked for order ID:', order.id);
     setEditingId(order.id);
+    console.log('editingId set to:', order.id);
     setEditForm({
       customer_id: order.customer_id,
       menu_item_id: '',
@@ -163,9 +172,10 @@ export default function Home() {
     return matchesDate && matchesCustomer && matchesPayment;
   });
 
+  console.log('Rendering Home component.');
+
   return (
-    <main className="min-h-screen bg-background">
-      <Topbar />
+    <main className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto py-6 px-2 sm:px-6 lg:px-8">
         <DashboardStats />
         <div className="py-2">
@@ -218,16 +228,80 @@ export default function Home() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {filteredOrders.map((order) => {
                           const customer = customers.find((c: any) => c.id === order.customer_id);
+                          const isEditing = editingId === order.id;
                           return (
                             <tr key={order.id}>
                               <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.order_date ? order.order_date.slice(0, 10) : '-'}</td>
-                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{customer ? customer.name : '-'}</td>
-                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.order_details}</td>
-                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">₹{order.amount}</td>
-                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.payment_status}</td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
+                                {isEditing ? (
+                                  <select
+                                    value={editForm.customer_id}
+                                    onChange={e => setEditForm(f => ({ ...f, customer_id: e.target.value }))}
+                                    className="border border-black rounded px-2 py-1 text-black bg-white"
+                                    required
+                                  >
+                                    <option value="">Select Customer</option>
+                                    {customers.map((c: any) => (
+                                      <option key={c.id} value={c.id}>{c.name}</option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <span className="text-black">{customer ? customer.name : '-'}</span>
+                                )}
+                              </td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
+                                {isEditing ? (
+                                  <input
+                                    type="text"
+                                    value={editForm.order_details}
+                                    onChange={e => setEditForm(f => ({ ...f, order_details: e.target.value }))}
+                                    className="border border-black rounded px-2 py-1 text-black bg-white"
+                                    required
+                                  />
+                                ) : (
+                                  <span className="text-black">{order.order_details}</span>
+                                )}
+                              </td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
+                                {isEditing ? (
+                                  <input
+                                    type="number"
+                                    value={editForm.amount}
+                                    onChange={e => setEditForm(f => ({ ...f, amount: e.target.value }))}
+                                    className="border border-black rounded px-2 py-1 text-black bg-white"
+                                    required
+                                  />
+                                ) : (<span className="text-black">₹{order.amount}</span>
+                                )}
+                              </td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
+                                {isEditing ? (
+                                  <select
+                                    value={editForm.payment_status}
+                                    onChange={e => setEditForm(f => ({ ...f, payment_status: e.target.value }))}
+                                    className="border border-black rounded px-2 py-1 text-black bg-white"
+                                    required
+                                  >
+                                    <option value="Paid">Paid</option>
+                                    <option value="Unpaid">Unpaid</option>
+                                    <option value="Partial">Partial</option>
+                                  </select>
+                                ) : (
+                                  <span className="text-black">{order.payment_status}</span>
+                                )}
+                              </td>
                               <td className="px-2 sm:px-6 py-4 whitespace-nowrap flex gap-2">
-                                <Button size="sm" type="button" onClick={() => startEdit(order)}>Edit</Button>
-                                <Button size="sm" type="button" onClick={() => handleDelete(order.id)}>Delete</Button>
+                                {isEditing ? (
+                                  <>
+                                    <Button size="sm" type="button" onClick={() => handleEditSave(order.id)}>Save</Button>
+                                    <Button size="sm" type="button" onClick={() => setEditingId(null)}>Cancel</Button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Button size="sm" type="button" onClick={() => startEdit(order)}>Edit</Button>
+                                    <Button size="sm" type="button" onClick={() => handleDelete(order.id)}>Delete</Button>
+                                  </>
+                                )}
                               </td>
                             </tr>
                           );

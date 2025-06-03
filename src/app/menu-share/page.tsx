@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Button from '@/components/ui/Button';
-import Topbar from '@/components/Topbar';
 
 export default function MenuSharePage() {
   const [menuItems, setMenuItems] = useState<any[]>([]);
@@ -56,7 +55,6 @@ export default function MenuSharePage() {
 
   return (
     <>
-      <Topbar />
       <div className="max-w-2xl mx-auto py-6 px-2 sm:px-4 lg:px-8">
         <h2 className="text-2xl font-bold mb-6 text-black">Menu Share (Today's Menu)</h2>
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8 mb-8">

@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Button from '@/components/ui/Button';
-import Topbar from '@/components/Topbar';
 
 function AddMenuItemCard({ onAdded }: { onAdded: () => void }) {
   const [form, setForm] = useState({ date: '', title: '', price: '', description: '', category: '' });
@@ -121,7 +120,6 @@ export default function MenuPage() {
 
   return (
     <>
-      <Topbar />
       <div className="max-w-7xl mx-auto py-8 px-2 sm:px-4 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 items-start">
           <div className="lg:col-span-2 order-1 lg:order-2 mt-4 lg:mt-0">
