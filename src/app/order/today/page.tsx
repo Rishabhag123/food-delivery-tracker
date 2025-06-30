@@ -340,8 +340,8 @@ export default function PublicOrderPage() {
               </select>
             </div>
             <div className="flex gap-4">
-              <button type="button" className="w-full" onClick={handlePayNow} disabled={submitting || !isFormValid()}>Pay Now</button>
-              <button type="button" className="w-full" onClick={handlePayLater} disabled={submitting || !isFormValid()}>Pay Later</button>
+              <button type="button" className="w-full bg-black text-white disabled:opacity-50" onClick={handlePayNow} disabled={submitting || !isFormValid()}>Pay Now</button>
+              <button type="button" className="w-full bg-black text-white disabled:opacity-50" onClick={handlePayLater} disabled={submitting || !isFormValid()}>Pay Later</button>
             </div>
           </form>
         )}
