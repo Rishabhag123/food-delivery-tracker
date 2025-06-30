@@ -3,8 +3,17 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Button from '@/components/ui/Button';
 
+type MenuItem = {
+  id: string;
+  date: string;
+  title: string;
+  price: number;
+  description?: string;
+  category: string;
+};
+
 export default function MenuSharePage() {
-  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -20,13 +29,13 @@ export default function MenuSharePage() {
 
   async function fetchMenu() {
     const { data } = await supabase.from('menu_items').select('*').order('date', { ascending: false });
-    setMenuItems(data || []);
+    setMenuItems((data as MenuItem[]) || []);
   }
 
   async function fetchToday() {
     const today = new Date().toISOString().slice(0, 10);
     const { data } = await supabase.from('todays_menu_items').select('menu_item_id').eq('date', today);
-    setSelectedIds((data || []).map((row: any) => row.menu_item_id));
+    setSelectedIds((data || []).map((row: { menu_item_id: string }) => row.menu_item_id));
   }
 
   function toggleMenuItem(id: string) {
@@ -61,12 +70,12 @@ export default function MenuSharePage() {
           <h3 className="text-lg font-semibold mb-4 text-black">Select Menu Items for Today</h3>
           <div className="space-y-6 mb-6">
             {['Breakfast', 'Lunch', 'Dinner'].map(category => {
-              const categoryItems = menuItems.filter(item => item.category === category);
+              const categoryItems = menuItems.filter((item: MenuItem) => item.category === category);
               if (categoryItems.length === 0) return null;
               return (
                 <div key={category} className="space-y-3">
                   <h4 className="text-md font-semibold text-black border-b border-gray-200 pb-2">{category}</h4>
-                  {categoryItems.map(item => (
+                  {categoryItems.map((item: MenuItem) => (
                     <label key={item.id} className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
@@ -81,7 +90,7 @@ export default function MenuSharePage() {
               );
             })}
           </div>
-          <Button onClick={saveTodayMenu} size="md" className="w-full" disabled={saving}>{saving ? 'Saving...' : 'Save Today\'s Menu'}</Button>
+          <Button onClick={saveTodayMenu} size="md" className="w-full" disabled={saving}>{saving ? 'Saving...' : 'Save Today&#39;s Menu'}</Button>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8">
           <h3 className="text-lg font-semibold mb-4 text-black">Share Link with Customers</h3>

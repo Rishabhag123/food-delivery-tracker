@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { FaHome, FaUserFriends, FaUtensils, FaCog, FaShareAlt } from 'react-icons/fa';
+import { FaHome, FaUserFriends, FaUtensils, FaShareAlt } from 'react-icons/fa';
 
 const navItems = [
   { label: 'Dashboard', icon: <FaHome className="text-black" />, href: '/' },

@@ -62,7 +62,7 @@ export default function OrdersTable() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Today's Orders</h2>
+        <h2 className="text-xl font-semibold">Today&apos;s Orders</h2>
         <select
           value={paymentFilter}
           onChange={(e) => setPaymentFilter(e.target.value as typeof paymentFilter)}

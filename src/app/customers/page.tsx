@@ -57,7 +57,6 @@ function AddCustomerCard({ onAdded }: { onAdded: () => void }) {
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<CustomerRow[]>([]);
-  const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ name: '', phone_number: '' });
 
@@ -66,9 +65,8 @@ export default function CustomersPage() {
   }, []);
 
   async function fetchCustomers() {
-    setLoading(true);
     const { data: customerList, error } = await supabase.from('customers').select('*');
-    if (error) return setLoading(false);
+    if (error) return;
     const rows: CustomerRow[] = [];
     for (const customer of customerList) {
       const { data: orders } = await supabase
@@ -92,7 +90,6 @@ export default function CustomersPage() {
       });
     }
     setCustomers(rows);
-    setLoading(false);
   }
 
   function startEdit(item: CustomerRow) {

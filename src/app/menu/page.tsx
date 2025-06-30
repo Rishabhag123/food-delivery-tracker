@@ -3,6 +3,15 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Button from '@/components/ui/Button';
 
+type MenuItem = {
+  id: string;
+  date: string;
+  title: string;
+  price: number;
+  description?: string;
+  category: string;
+};
+
 function AddMenuItemCard({ onAdded }: { onAdded: () => void }) {
   const [form, setForm] = useState({ date: '', title: '', price: '', description: '', category: '' });
   async function handleAdd(e: React.FormEvent) {
@@ -81,8 +90,7 @@ function AddMenuItemCard({ onAdded }: { onAdded: () => void }) {
 }
 
 export default function MenuPage() {
-  const [menu, setMenu] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [menu, setMenu] = useState<MenuItem[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ date: '', title: '', price: '', description: '', category: '' });
 
@@ -91,13 +99,11 @@ export default function MenuPage() {
   }, []);
 
   async function fetchMenu() {
-    setLoading(true);
     const { data, error } = await supabase.from('menu_items').select('*').order('date', { ascending: false });
-    if (!error) setMenu(data || []);
-    setLoading(false);
+    if (!error) setMenu((data as MenuItem[]) || []);
   }
 
-  function startEdit(item: any) {
+  function startEdit(item: MenuItem) {
     setEditingId(item.id);
     setEditForm({ date: item.date, title: item.title, price: item.price.toString(), description: item.description || '', category: item.category || '' });
   }

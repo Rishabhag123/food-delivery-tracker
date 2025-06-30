@@ -3,11 +3,27 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
+type Customer = {
+  id: string;
+  name: string;
+  phone_number?: string;
+};
+
+type Order = {
+  id: string;
+  order_date: string;
+  order_details: string;
+  amount: number;
+  payment_status: string;
+  delivery_location?: string;
+  customer_id: string;
+};
+
 export default function CustomerDetailPage() {
   const params = useParams();
   const customerId = params?.id as string;
-  const [customer, setCustomer] = useState<any>(null);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,8 +35,8 @@ export default function CustomerDetailPage() {
     setLoading(true);
     const { data: customerData } = await supabase.from('customers').select('*').eq('id', customerId).single();
     const { data: orderList } = await supabase.from('orders').select('*').eq('customer_id', customerId).order('order_date', { ascending: false });
-    setCustomer(customerData);
-    setOrders(orderList || []);
+    setCustomer(customerData as Customer);
+    setOrders((orderList as Order[]) || []);
     setLoading(false);
   }
 

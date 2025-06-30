@@ -3,6 +3,16 @@ import { supabase } from '@/lib/supabase';
 import { FaMoneyBillWave, FaShoppingCart, FaChartLine, FaCalendarDay } from 'react-icons/fa';
 import StatCard from './ui/StatCard';
 
+type Order = {
+  id: string;
+  order_date: string;
+  order_details: string;
+  amount: number;
+  payment_status: string;
+  delivery_location?: string;
+  customer_id: string;
+};
+
 export default function DashboardStats() {
   const [stats, setStats] = useState({
     totalSales: 0,
@@ -27,10 +37,11 @@ export default function DashboardStats() {
       .from('orders')
       .select('*');
     if (error) return;
-    const totalSales = allOrders.filter((o: any) => o.payment_status === 'Paid' || o.payment_status === 'Partial').reduce((sum: number, o: any) => sum + Number(o.amount), 0);
-    const totalOrders = allOrders.length;
-    const totalRevenue = allOrders.reduce((sum: number, o: any) => sum + Number(o.amount), 0);
-    const todaysEarnings = allOrders.filter((o: any) => o.payment_status === 'Paid' && o.order_date === today).reduce((sum: number, o: any) => sum + Number(o.amount), 0);
+    const orders = (allOrders as Order[]) || [];
+    const totalSales = orders.filter((o) => o.payment_status === 'Paid' || o.payment_status === 'Partial').reduce((sum, o) => sum + Number(o.amount), 0);
+    const totalOrders = orders.length;
+    const totalRevenue = orders.reduce((sum, o) => sum + Number(o.amount), 0);
+    const todaysEarnings = orders.filter((o) => o.payment_status === 'Paid' && o.order_date === today).reduce((sum, o) => sum + Number(o.amount), 0);
     setStats({ totalSales, totalOrders, totalRevenue, todaysEarnings });
   }
 
