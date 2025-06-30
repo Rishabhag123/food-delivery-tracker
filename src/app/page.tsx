@@ -6,25 +6,22 @@ import Button from '@/components/ui/Button';
 import DashboardStats from '@/components/DashboardStats';
 
 function AddOrderCard({ onAdded, customers, menuItems }: any) {
-  const [form, setForm] = useState({ customer_id: '', menu_item_id: '', order_details: '', amount: '', payment_status: 'Unpaid' });
+  const [form, setForm] = useState({ customer_id: '', order_details: '', amount: '', payment_status: 'Unpaid' });
   function handleMenuChange(menu_item_id: string) {
-    setForm(f => {
-      const item = menuItems.find((m: any) => m.id === menu_item_id);
-      return {
-        ...f,
-        menu_item_id,
-        order_details: item ? item.title : '',
-        amount: item ? item.price.toString() : '',
-      };
-    });
+    const item = menuItems.find((m: any) => m.id === menu_item_id);
+    setForm(f => ({
+      ...f,
+      order_details: item ? item.title : '',
+      amount: item ? item.price.toString() : '',
+    }));
   }
   async function handleAdd(e: any) {
     e.preventDefault();
-    const { customer_id, menu_item_id, order_details, amount, payment_status } = form;
-    if (!customer_id || !menu_item_id || !amount) return alert('Customer, menu item, and amount are required');
+    const { customer_id, order_details, amount, payment_status } = form;
+    if (!customer_id || !order_details || !amount) return alert('Customer, menu item, and amount are required');
     const { error } = await supabase.from('orders').insert([{ customer_id, order_details, amount: parseFloat(amount), payment_status }]);
     if (error) return alert('Error adding order');
-    setForm({ customer_id: '', menu_item_id: '', order_details: '', amount: '', payment_status: 'Unpaid' });
+    setForm({ customer_id: '', order_details: '', amount: '', payment_status: 'Unpaid' });
     onAdded();
   }
   return (
@@ -48,7 +45,6 @@ function AddOrderCard({ onAdded, customers, menuItems }: any) {
         <div>
           <label className="block text-sm font-medium text-black mb-1">Menu Item</label>
           <select
-            value={form.menu_item_id}
             onChange={e => handleMenuChange(e.target.value)}
             className="w-full border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
             required
@@ -107,7 +103,7 @@ export default function Home() {
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ customer_id: '', menu_item_id: '', order_details: '', amount: '', payment_status: 'Unpaid' });
+  const [editForm, setEditForm] = useState({ customer_id: '', order_details: '', amount: '', payment_status: 'Unpaid', delivery_location: '' });
   const [filterDate, setFilterDate] = useState('');
   const [filterCustomer, setFilterCustomer] = useState('');
   const [filterPaymentStatus, setFilterPaymentStatus] = useState('');
@@ -141,17 +137,17 @@ export default function Home() {
     console.log('editingId set to:', order.id);
     setEditForm({
       customer_id: order.customer_id,
-      menu_item_id: '',
       order_details: order.order_details,
       amount: order.amount.toString(),
       payment_status: order.payment_status,
+      delivery_location: order.delivery_location || '',
     });
   }
 
   async function handleEditSave(id: string) {
-    const { customer_id, order_details, amount, payment_status } = editForm;
+    const { customer_id, order_details, amount, payment_status, delivery_location } = editForm;
     if (!customer_id || !amount) return alert('Customer and amount are required');
-    const { error } = await supabase.from('orders').update({ customer_id, order_details, amount: parseFloat(amount), payment_status }).eq('id', id);
+    const { error } = await supabase.from('orders').update({ customer_id, order_details, amount: parseFloat(amount), payment_status, delivery_location }).eq('id', id);
     if (error) return alert('Error updating order');
     setEditingId(null);
     setRefreshKey(k => k + 1);
@@ -221,6 +217,7 @@ export default function Home() {
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Customer</th>
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Order Details</th>
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Amount</th>
+                          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Delivery Location</th>
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Payment Status</th>
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Actions</th>
                         </tr>
@@ -272,6 +269,23 @@ export default function Home() {
                                     required
                                   />
                                 ) : (<span className="text-black">₹{order.amount}</span>
+                                )}
+                              </td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">
+                                {isEditing ? (
+                                  <select
+                                    value={editForm.delivery_location}
+                                    onChange={e => setEditForm(f => ({ ...f, delivery_location: e.target.value }))}
+                                    className="border border-black rounded px-2 py-1 text-black bg-white"
+                                    required
+                                  >
+                                    <option value="">Select Location</option>
+                                    <option value="WeWork">WeWork</option>
+                                    <option value="P1 Hostel">P1 Hostel</option>
+                                    <option value="P2 Hostel">P2 Hostel</option>
+                                  </select>
+                                ) : (
+                                  order.delivery_location || '-'
                                 )}
                               </td>
                               <td className="px-2 sm:px-6 py-4 whitespace-nowrap">

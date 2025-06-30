@@ -47,6 +47,7 @@ export default function CustomerDetailPage() {
                   <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Date</th>
                   <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Details</th>
                   <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Amount</th>
+                  <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Delivery Location</th>
                   <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Payment Status</th>
                 </tr>
               </thead>
@@ -56,6 +57,7 @@ export default function CustomerDetailPage() {
                     <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.order_date}</td>
                     <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.order_details}</td>
                     <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">₹{order.amount.toLocaleString()}</td>
+                    <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.delivery_location || '-'}</td>
                     <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.payment_status}</td>
                   </tr>
                 ))}

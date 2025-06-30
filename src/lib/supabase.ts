@@ -19,6 +19,7 @@ export type Order = {
   order_details: string;
   amount: number;
   payment_status: 'Paid' | 'Unpaid' | 'Partial';
+  delivery_location: string;
   created_at: string;
 };
 
