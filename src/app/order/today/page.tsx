@@ -172,7 +172,7 @@ export default function PublicOrderPage() {
       name: 'JMD Tiffins',
       description: 'Order Payment',
       order_id: data.orderId,
-      handler: async function (__response: unknown) {
+      handler: async function () {
         await supabase.from('orders').update({ payment_status: 'Paid' }).eq('id', orderData.id);
         setPaymentSuccess(true);
       },

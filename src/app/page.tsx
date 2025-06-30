@@ -5,17 +5,42 @@ import { supabase } from '@/lib/supabase';
 import Button from '@/components/ui/Button';
 import DashboardStats from '@/components/DashboardStats';
 
-function AddOrderCard({ onAdded, customers, menuItems }: any) {
+type Customer = {
+  id: string;
+  name: string;
+  // Add other fields as needed
+};
+
+type MenuItem = {
+  id: string;
+  title: string;
+  price: number;
+  date?: string;
+  // Add other fields as needed
+};
+
+type Order = {
+  id: string;
+  customer_id: string;
+  order_details: string;
+  amount: number;
+  payment_status: string;
+  order_date?: string;
+  delivery_location?: string;
+  // Add other fields as needed
+};
+
+function AddOrderCard({ onAdded, customers, menuItems }: { onAdded: () => void; customers: Customer[]; menuItems: MenuItem[] }) {
   const [form, setForm] = useState({ customer_id: '', order_details: '', amount: '', payment_status: 'Unpaid' });
   function handleMenuChange(menu_item_id: string) {
-    const item = menuItems.find((m: any) => m.id === menu_item_id);
+    const item = menuItems.find((m) => m.id === menu_item_id);
     setForm(f => ({
       ...f,
       order_details: item ? item.title : '',
       amount: item ? item.price.toString() : '',
     }));
   }
-  async function handleAdd(e: any) {
+  async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const { customer_id, order_details, amount, payment_status } = form;
     if (!customer_id || !order_details || !amount) return alert('Customer, menu item, and amount are required');
@@ -37,7 +62,7 @@ function AddOrderCard({ onAdded, customers, menuItems }: any) {
             required
           >
             <option value="">Select Customer</option>
-            {customers.map((c: any) => (
+            {customers.map((c: Customer) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
@@ -50,7 +75,7 @@ function AddOrderCard({ onAdded, customers, menuItems }: any) {
             required
           >
             <option value="">Select Menu Item</option>
-            {menuItems.map((m: any) => (
+            {menuItems.map((m: MenuItem) => (
               <option key={m.id} value={m.id}>{m.title} ({m.date}) - ₹{m.price}</option>
             ))}
           </select>
@@ -98,9 +123,9 @@ function AddOrderCard({ onAdded, customers, menuItems }: any) {
 
 export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
-  const [orders, setOrders] = useState<any[]>([]);
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ customer_id: '', order_details: '', amount: '', payment_status: 'Unpaid', delivery_location: '' });
@@ -131,7 +156,7 @@ export default function Home() {
     console.log('fetchAll complete. Orders:', ordersData?.length, 'Customers:', customersData?.length, 'Menu Items:', menuData?.length);
   }
 
-  function startEdit(order: any) {
+  function startEdit(order: Order) {
     console.log('Edit button clicked for order ID:', order.id);
     setEditingId(order.id);
     console.log('editingId set to:', order.id);
@@ -224,7 +249,7 @@ export default function Home() {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {filteredOrders.map((order) => {
-                          const customer = customers.find((c: any) => c.id === order.customer_id);
+                          const customer = customers.find((c: Customer) => c.id === order.customer_id);
                           const isEditing = editingId === order.id;
                           return (
                             <tr key={order.id}>
@@ -238,7 +263,7 @@ export default function Home() {
                                     required
                                   >
                                     <option value="">Select Customer</option>
-                                    {customers.map((c: any) => (
+                                    {customers.map((c: Customer) => (
                                       <option key={c.id} value={c.id}>{c.name}</option>
                                     ))}
                                   </select>

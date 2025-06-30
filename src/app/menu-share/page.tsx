@@ -65,7 +65,7 @@ export default function MenuSharePage() {
   return (
     <>
       <div className="max-w-2xl mx-auto py-6 px-2 sm:px-4 lg:px-8">
-        <h2 className="text-2xl font-bold mb-6 text-black">Menu Share (Today's Menu)</h2>
+        <h2 className="text-2xl font-bold mb-6 text-black">Menu Share (Today&apos;s Menu)</h2>
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8 mb-8">
           <h3 className="text-lg font-semibold mb-4 text-black">Select Menu Items for Today</h3>
           <div className="space-y-6 mb-6">
@@ -90,7 +90,7 @@ export default function MenuSharePage() {
               );
             })}
           </div>
-          <Button onClick={saveTodayMenu} size="md" className="w-full" disabled={saving}>{saving ? 'Saving...' : 'Save Today&#39;s Menu'}</Button>
+          <Button onClick={saveTodayMenu} size="md" className="w-full" disabled={saving}>{saving ? 'Saving...' : "Save Today&apos;s Menu"}</Button>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-8">
           <h3 className="text-lg font-semibold mb-4 text-black">Share Link with Customers</h3>
