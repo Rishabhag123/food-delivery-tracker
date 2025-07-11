@@ -93,6 +93,8 @@ export default function MenuPage() {
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ date: '', title: '', price: '', description: '', category: '' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const MENU_PER_PAGE = 20;
 
   useEffect(() => {
     fetchMenu();
@@ -124,6 +126,9 @@ export default function MenuPage() {
     fetchMenu();
   }
 
+  const totalPages = Math.ceil(menu.length / MENU_PER_PAGE);
+  const paginatedMenu = menu.slice((currentPage - 1) * MENU_PER_PAGE, currentPage * MENU_PER_PAGE);
+
   return (
     <>
       <div className="max-w-7xl mx-auto py-8 px-2 sm:px-4 lg:px-8">
@@ -142,7 +147,7 @@ export default function MenuPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {menu.map((item) => (
+                  {paginatedMenu.map((item) => (
                     <tr key={item.id}>
                       {editingId === item.id ? (
                         <>
@@ -180,6 +185,12 @@ export default function MenuPage() {
                   ))}
                 </tbody>
               </table>
+              {/* Pagination Controls */}
+              <div className="bg-white p-2 flex justify-center items-center gap-2">
+                <Button size="sm" type="button" disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>&lt; Prev</Button>
+                <span className="text-black">Page {currentPage} of {totalPages}</span>
+                <Button size="sm" type="button" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}>Next &gt;</Button>
+              </div>
             </div>
           </div>
           <div className="lg:col-span-1 order-2 lg:order-1">

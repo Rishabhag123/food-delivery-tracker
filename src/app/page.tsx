@@ -16,6 +16,7 @@ type MenuItem = {
   title: string;
   price: number;
   date?: string;
+  category?: string;
   // Add other fields as needed
 };
 
@@ -27,11 +28,17 @@ type Order = {
   payment_status: string;
   order_date?: string;
   delivery_location?: string;
+  delivery_date?: string;
   // Add other fields as needed
 };
 
 function AddOrderCard({ onAdded, customers, menuItems }: { onAdded: () => void; customers: Customer[]; menuItems: MenuItem[] }) {
-  const [form, setForm] = useState({ customer_id: '', order_details: '', amount: '', payment_status: 'Unpaid' });
+  const [form, setForm] = useState({ customer_id: '', order_details: '', amount: '', payment_status: 'Unpaid', delivery_location: '' });
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    const nowIST = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+    return nowIST.toISOString().slice(0, 10);
+  });
   function handleMenuChange(menu_item_id: string) {
     const item = menuItems.find((m) => m.id === menu_item_id);
     setForm(f => ({
@@ -42,11 +49,43 @@ function AddOrderCard({ onAdded, customers, menuItems }: { onAdded: () => void; 
   }
   async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const { customer_id, order_details, amount, payment_status } = form;
-    if (!customer_id || !order_details || !amount) return alert('Customer, menu item, and amount are required');
-    const { error } = await supabase.from('orders').insert([{ customer_id, order_details, amount: parseFloat(amount), payment_status }]);
+    const { customer_id, order_details, amount, payment_status, delivery_location } = form;
+    if (!customer_id || !order_details || !amount || !delivery_location) return alert('Customer, menu item, amount, and delivery location are required');
+    // Use selectedDate as the base date in IST
+    let deliveryDate = selectedDate;
+    // If selectedDate is today, apply 9pm logic, else use selectedDate as is
+    const now = new Date();
+    const nowIST = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+    const todayIST = nowIST.toISOString().slice(0, 10);
+    let createdAtIST;
+    if (selectedDate === todayIST) {
+      if (nowIST.getHours() >= 21) {
+        // After 9pm IST, set delivery date to next day
+        const nextDay = new Date(nowIST);
+        nextDay.setDate(nowIST.getDate() + 1);
+        deliveryDate = nextDay.toISOString().slice(0, 10);
+      }
+      createdAtIST = nowIST.toISOString();
+    } else {
+      // Use selected date at 12:00 IST for created_at
+      const [year, month, day] = selectedDate.split('-');
+      const dateAtNoonIST = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), 12, 0, 0));
+      createdAtIST = new Date(dateAtNoonIST.getTime() + 5.5 * 60 * 60 * 1000).toISOString();
+    }
+    const { error } = await supabase.from('orders').insert([
+      {
+        customer_id,
+        order_details,
+        amount: parseFloat(amount),
+        payment_status,
+        delivery_date: deliveryDate,
+        created_at: createdAtIST,
+        delivery_location,
+      }
+    ]);
     if (error) return alert('Error adding order');
-    setForm({ customer_id: '', order_details: '', amount: '', payment_status: 'Unpaid' });
+    setForm({ customer_id: '', order_details: '', amount: '', payment_status: 'Unpaid', delivery_location: '' });
+    setSelectedDate(todayIST);
     onAdded();
   }
   return (
@@ -115,6 +154,30 @@ function AddOrderCard({ onAdded, customers, menuItems }: { onAdded: () => void; 
             <option value="Partial">Partial</option>
           </select>
         </div>
+        <div>
+          <label className="block text-sm font-medium text-black mb-1">Order Date</label>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={e => setSelectedDate(e.target.value)}
+            className="w-full border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-black mb-1">Delivery Location</label>
+          <select
+            value={form.delivery_location}
+            onChange={e => setForm(f => ({ ...f, delivery_location: e.target.value }))}
+            className="w-full border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
+            required
+          >
+            <option value="">Select Location</option>
+            <option value="WeWork">WeWork</option>
+            <option value="P1 Hostel">P1 Hostel</option>
+            <option value="P2 Hostel">P2 Hostel</option>
+          </select>
+        </div>
         <Button type="submit" size="md" className="w-full">Add</Button>
       </form>
     </div>
@@ -132,6 +195,11 @@ export default function Home() {
   const [filterDate, setFilterDate] = useState('');
   const [filterCustomer, setFilterCustomer] = useState('');
   const [filterPaymentStatus, setFilterPaymentStatus] = useState('');
+  // Add filter and pagination states
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterCustomerName, setFilterCustomerName] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ORDERS_PER_PAGE = 20;
 
   useEffect(() => {
     console.log('Fetching all data...');
@@ -187,11 +255,18 @@ export default function Home() {
 
   // Filtering logic
   const filteredOrders = orders.filter(order => {
-    const matchesDate = filterDate ? order.order_date && order.order_date.slice(0, 10) === filterDate : true;
+    const matchesDate = filterDate ? order.delivery_date && order.delivery_date.slice(0, 10) === filterDate : true;
     const matchesCustomer = filterCustomer ? order.customer_id === filterCustomer : true;
     const matchesPayment = filterPaymentStatus ? order.payment_status === filterPaymentStatus : true;
-    return matchesDate && matchesCustomer && matchesPayment;
+    const menuItem = menuItems.find(m => m.title === order.order_details);
+    const matchesCategory = filterCategory ? (menuItem && menuItem.category === filterCategory) : true;
+    const customer = customers.find(c => c.id === order.customer_id);
+    const matchesCustomerName = filterCustomerName ? (customer && customer.name.toLowerCase().includes(filterCustomerName.toLowerCase())) : true;
+    return matchesDate && matchesCustomer && matchesPayment && matchesCategory && matchesCustomerName;
   });
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOrders.length / ORDERS_PER_PAGE);
+  const paginatedOrders = filteredOrders.slice((currentPage - 1) * ORDERS_PER_PAGE, currentPage * ORDERS_PER_PAGE);
 
   console.log('Rendering Home component.');
 
@@ -227,8 +302,31 @@ export default function Home() {
                       <option value="Partial">Partial</option>
                     </select>
                   </div>
-                  {(filterDate || filterCustomer || filterPaymentStatus) && (
-                    <Button type="button" size="sm" className="h-10" onClick={() => { setFilterDate(''); setFilterCustomer(''); setFilterPaymentStatus(''); }}>Clear Filters</Button>
+                  <div className="flex-1 min-w-0">
+                    <label className="block text-sm font-medium text-black mb-1">Filter by Category</label>
+                    <select
+                      value={filterCategory}
+                      onChange={e => setFilterCategory(e.target.value)}
+                      className="w-full border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
+                    >
+                      <option value="">All Categories</option>
+                      <option value="Breakfast">Breakfast</option>
+                      <option value="Lunch">Lunch</option>
+                      <option value="Dinner">Dinner</option>
+                    </select>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <label className="block text-sm font-medium text-black mb-1">Filter by Name</label>
+                    <input
+                      type="text"
+                      value={filterCustomerName}
+                      onChange={e => setFilterCustomerName(e.target.value)}
+                      placeholder="Search by customer name"
+                      className="w-full border border-black rounded-lg px-3 py-2 bg-white text-black focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  {(filterDate || filterCustomer || filterPaymentStatus || filterCategory || filterCustomerName) && (
+                    <Button type="button" size="sm" className="h-10" onClick={() => { setFilterDate(''); setFilterCustomer(''); setFilterPaymentStatus(''); setFilterCategory(''); setFilterCustomerName(''); }}>Clear Filters</Button>
                   )}
                 </div>
                 {loading ? (
@@ -238,22 +336,23 @@ export default function Home() {
                     <table className="w-full max-w-full bg-white rounded-lg shadow divide-y divide-gray-200 text-xs sm:text-sm">
                       <thead className="bg-white">
                         <tr>
-                          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Order Date</th>
+                          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Delivery Date</th>
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Customer</th>
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Order Details</th>
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Amount</th>
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Delivery Location</th>
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Payment Status</th>
+                          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Category</th>
                           <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-black uppercase">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredOrders.map((order) => {
+                        {paginatedOrders.map((order) => {
                           const customer = customers.find((c: Customer) => c.id === order.customer_id);
                           const isEditing = editingId === order.id;
                           return (
                             <tr key={order.id}>
-                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.order_date ? order.order_date.slice(0, 10) : '-'}</td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{order.delivery_date ? order.delivery_date.slice(0, 10) : '-'}</td>
                               <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
                                 {isEditing ? (
                                   <select
@@ -329,6 +428,10 @@ export default function Home() {
                                   <span className="text-black">{order.payment_status}</span>
                                 )}
                               </td>
+                              <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-black">{(() => {
+                                const menuItem = menuItems.find(m => m.title === order.order_details);
+                                return menuItem ? menuItem.category : '-';
+                              })()}</td>
                               <td className="px-2 sm:px-6 py-4 whitespace-nowrap flex gap-2">
                                 {isEditing ? (
                                   <>
@@ -349,6 +452,12 @@ export default function Home() {
                     </table>
                   </div>
                 )}
+              </div>
+              {/* Pagination controls */}
+              <div className="flex justify-center items-center gap-2 mt-4 bg-white rounded p-2">
+                <Button size="sm" type="button" disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>&lt; Prev</Button>
+                <span className="text-black">Page {currentPage} of {totalPages}</span>
+                <Button size="sm" type="button" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}>Next &gt;</Button>
               </div>
             </div>
             <div className="lg:col-span-1 order-2 lg:order-1">

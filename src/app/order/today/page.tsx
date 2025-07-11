@@ -16,6 +16,7 @@ type MenuItem = {
   title: string;
   price: number;
   category: string;
+  date: string;
 };
 
 export default function PublicOrderPage() {
@@ -99,6 +100,20 @@ export default function PublicOrderPage() {
       alert('Selected menu item not found.');
       return;
     }
+    // Calculate delivery_date and created_at based on IST (add 5:30 to UTC)
+    const now = new Date();
+    const nowIST = new Date(now.getTime() + 5.5 * 60 * 60 * 1000); // Add 5 hours 30 minutes
+    let deliveryDate;
+    if (nowIST.getHours() >= 21) {
+      // After 9pm IST, set delivery date to next day
+      const nextDay = new Date(nowIST);
+      nextDay.setDate(nowIST.getDate() + 1);
+      deliveryDate = nextDay.toISOString().slice(0, 10);
+    } else {
+      // Otherwise, set to today (IST)
+      deliveryDate = nowIST.toISOString().slice(0, 10);
+    }
+    const createdAtIST = nowIST.toISOString();
     const { error: orderError } = await supabase.from('orders').insert([
       {
         customer_id: customerId,
@@ -106,6 +121,8 @@ export default function PublicOrderPage() {
         amount: menuItem.price,
         payment_status: 'Unpaid',
         delivery_location: selectedLocation,
+        delivery_date: deliveryDate,
+        created_at: createdAtIST,
       },
     ]).select().single();
     setSubmitting(false);
@@ -128,6 +145,20 @@ export default function PublicOrderPage() {
       alert('Selected menu item not found.');
       return;
     }
+    // Calculate delivery_date and created_at based on IST (add 5:30 to UTC)
+    const now = new Date();
+    const nowIST = new Date(now.getTime() + 5.5 * 60 * 60 * 1000); // Add 5 hours 30 minutes
+    let deliveryDate;
+    if (nowIST.getHours() >= 21) {
+      // After 9pm IST, set delivery date to next day
+      const nextDay = new Date(nowIST);
+      nextDay.setDate(nowIST.getDate() + 1);
+      deliveryDate = nextDay.toISOString().slice(0, 10);
+    } else {
+      // Otherwise, set to today (IST)
+      deliveryDate = nowIST.toISOString().slice(0, 10);
+    }
+    const createdAtIST = nowIST.toISOString();
     const { data: orderData, error: orderError } = await supabase.from('orders').insert([
       {
         customer_id: customerId,
@@ -135,6 +166,8 @@ export default function PublicOrderPage() {
         amount: menuItem.price,
         payment_status: 'Unpaid',
         delivery_location: selectedLocation,
+        delivery_date: deliveryDate,
+        created_at: createdAtIST,
       },
     ]).select().single();
     setSubmitting(false);

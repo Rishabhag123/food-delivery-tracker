@@ -59,6 +59,8 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState<CustomerRow[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ name: '', phone_number: '' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const CUSTOMERS_PER_PAGE = 20;
 
   useEffect(() => {
     fetchCustomers();
@@ -113,6 +115,9 @@ export default function CustomersPage() {
     fetchCustomers();
   }
 
+  const totalPages = Math.ceil(customers.length / CUSTOMERS_PER_PAGE);
+  const paginatedCustomers = customers.slice((currentPage - 1) * CUSTOMERS_PER_PAGE, currentPage * CUSTOMERS_PER_PAGE);
+
   return (
     <>
       <div className="max-w-7xl mx-auto py-8 px-2 sm:px-4 lg:px-8">
@@ -131,7 +136,7 @@ export default function CustomersPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {customers.map((c) => (
+                  {paginatedCustomers.map((c) => (
                     <tr key={c.id}>
                       {editingId === c.id ? (
                         <>
@@ -163,6 +168,12 @@ export default function CustomersPage() {
                   ))}
                 </tbody>
               </table>
+              {/* Pagination Controls */}
+              <div className="bg-white p-2 flex justify-center items-center gap-2">
+                <Button size="sm" type="button" disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>&lt; Prev</Button>
+                <span className="text-black">Page {currentPage} of {totalPages}</span>
+                <Button size="sm" type="button" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}>Next &gt;</Button>
+              </div>
             </div>
           </div>
           <div className="lg:col-span-1 order-2 lg:order-1">
